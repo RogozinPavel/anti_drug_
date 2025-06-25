@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Викторина: А знаю ли я про белую смерть</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px; background: #f0f8ff; }
+  h1, h2 { text-align: center; }
+  .hidden { display: none; }
+  .question { margin-top: 20px; }
+  .question img { max-width: 100%; height: auto; display: block; margin: 10px auto; border-radius: 8px; }
+  .answers { margin-top: 10px; }
+  label { display: block; margin-bottom: 8px; cursor: pointer; }
+  button { margin-top: 20px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
+  #certificate { border: 2px solid #333; padding: 20px; margin-top: 30px; text-align: center; background: #fff; }
+  #certificate h2 { margin-bottom: 10px; }
+  input, select { width: 100%; padding: 8px; margin-bottom: 10px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<h1>Викторина: А знаю ли я про белую смерть</h1>
+<p>Пожалуйста, заполните форму регистрации перед началом викторины:</p>
+
+<div id="registration">
+  <input type="text" id="fio" placeholder="ФИО" required />
+  <input type="number" id="age" placeholder="Возраст" min="10" max="100" required />
+  <input type="text" id="school" placeholder="Образовательное учреждение" required />
+  <input type="email" id="email" placeholder="Email" required />
+  <button id="startBtn">Начать викторину</button>
+</div>
+
+<div id="quiz" class="hidden">
+  <h2 id="question-title"></h2>
+  <img id="question-image" src="" alt="Иллюстрация" />
+  <div class="answers" id="answers"></div>
+  <button id="nextBtn">Следующий вопрос</button>
+</div>
+
+<div id="result" class="hidden">
+  <h2>Ваш результат</h2>
+  <p id="score-text"></p>
+  <div id="certificate"></div>
+</div>
+
+<script>
+  // Вопросы: текст, варианты, индекс правильного ответа, ссылка на картинку (загрузи картинки в папку images)
+  const questions = [
+    {
+      question: "Что означает термин «белая смерть»?",
+      answers: ["Сахар", "Наркотики", "Соль", "Порошок для выпечки"],
+      correct: 1,
+      image: "https://i.imgur.com/OCSl6R3.jpg"
+    },
+    {
+      question: "Какой наркотик чаще всего называют «белой смертью»?",
+      answers: ["Кокаин", "Марихуана", "Героин", "Амфетамин"],
+      correct: 0,
+      image: "https://i.imgur.com/6lL7ZC6.jpg"
+    },
+    {
+      question: "Какое влияние оказывают наркотики на мозг?",
+      answers: [
+        "Улучшают память",
+        "Вызывают зависимость и ухудшают работу мозга",
+        "Повышают интеллект",
+        "Не влияют"
+      ],
+      correct: 1,
+      image: "https://i.imgur.com/TmDnWeG.jpg"
+    },
+    {
+      question: "Как долго длится период ломки при наркотической зависимости?",
+      answers: [
+        "Несколько часов",
+        "Несколько дней или недель",
+        "Несколько месяцев",
+        "Никогда не проходит"
+      ],
+      correct: 1,
+      image: "https://i.imgur.com/Z29ON7x.jpg"
+    },
+    {
+      question: "Какое из перечисленных не является наркотиком?",
+      answers: ["Алкоголь", "Табак", "Кофе", "Героин"],
+      correct: 2,
+      image: "https://i.imgur.com/f4QZ5SH.jpg"
+    },
+    {
+      question: "Какие признаки могут указывать на наркотическую зависимость?",
+      answers: [
+        "Потеря интереса к учебе и друзьям",
+        "Улучшение физической формы",
+        "Стабильное настроение",
+        "Повышенная работоспособность"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/JMxl7mX.jpg"
+    },
+    {
+      question: "Можно ли вылечиться от наркотической зависимости?",
+      answers: ["Да, с помощью лечения", "Нет, это навсегда", "Иногда", "Не знаю"],
+      correct: 0,
+      image: "https://i.imgur.com/xcjA0lT.jpg"
+    },
+    {
+      question: "Кто чаще всего попадает в зависимость от наркотиков?",
+      answers: [
+        "Подростки и молодёжь",
+        "Пожилые люди",
+        "Дети до 10 лет",
+        "Все равнозначно"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/TscNXeT.jpg"
+    },
+    {
+      question: "Как лучше всего противостоять давлению попробовать наркотики?",
+      answers: [
+        "Соглашаться ради компании",
+        "Отказаться и искать поддержку друзей и семьи",
+        "Игнорировать проблему",
+        "Пытаться скрыть от взрослых"
+      ],
+      correct: 1,
+      image: "https://i.imgur.com/K9Ko8ry.jpg"
+    },
+    {
+      question: "Что делать, если друг предлагает наркотики?",
+      answers: [
+        "Согласиться, чтобы не потерять друга",
+        "Объяснить, почему не хочешь и уйти",
+        "Игнорировать и молчать",
+        "Сообщить незнакомым людям"
+      ],
+      correct: 1,
+      image: "https://i.imgur.com/0EXLPnu.jpg"
+    },
+    {
+      question: "Как влияет наркотическая зависимость на семью?",
+      answers: [
+        "Укрепляет отношения",
+        "Вызывает конфликты и боль",
+        "Не влияет",
+        "Улучшает общение"
+      ],
+      correct: 1,
+      image: "https://i.imgur.com/8VNKzoA.jpg"
+    },
+    {
+      question: "Какие органы страдают от употребления наркотиков?",
+      answers: [
+        "Мозг, сердце, печень",
+        "Только мозг",
+        "Только печень",
+        "Только сердце"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/FmkX7bC.jpg"
+    },
+    {
+      question: "Что такое реабилитация после зависимости?",
+      answers: [
+        "Период восстановления и помощи",
+        "Продолжение употребления",
+        "Игнорирование проблемы",
+        "Изоляция от общества"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/FftU8hs.jpg"
+    },
+    {
+      question: "Какие бывают виды помощи для зависимых?",
+      answers: [
+        "Медицинская, психологическая, социальная",
+        "Только медицинская",
+        "Только психологическая",
+        "Нет помощи"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/TrbiB7E.jpg"
+    },
+    {
+      question: "Можно ли стать зависимым от курительных смесей?",
+      answers: ["Да", "Нет", "Иногда", "Не знаю"],
+      correct: 0,
+      image: "https://i.imgur.com/69lJZjN.jpg"
+    },
+    {
+      question: "Как влияет наркотик на поведение человека?",
+      answers: [
+        "Улучшается настроение и контроль",
+        "Становится агрессивным и неадекватным",
+        "Становится спокойным и умиротворённым",
+        "Не меняется"
+      ],
+      correct: 1,
+      image: "https://i.imgur.com/bQwSS7Z.jpg"
+    },
+    {
+      question: "Что значит «толерантность» в наркологии?",
+      answers: [
+        "Привыкание к наркотику, нужно больше дозы",
+        "Неприятие наркотика организмом",
+        "Полное выздоровление",
+        "Отказ от наркотиков"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/ZoH8K3G.jpg"
+    },
+    {
+      question: "Как можно помочь человеку с наркотической зависимостью?",
+      answers: [
+        "Поддержать, не осуждать и помочь обратиться за помощью",
+        "Игнорировать и оставлять одного",
+        "Угрожать и наказывать",
+        "Смеяться и шутить"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/7K2ESNY.jpg"
+    },
+    {
+      question: "Можно ли предупредить наркотическую зависимость?",
+      answers: [
+        "Да, с помощью профилактики и поддержки",
+        "Нет, это случайность",
+        "Иногда",
+        "Не знаю"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/Yb6yt7W.jpg"
+    },
+    {
+      question: "Куда можно обратиться за помощью при зависимости?",
+      answers: [
+        "К врачам, психологам, социальным службам",
+        "К друзьям, которые тоже употребляют",
+        "Никому не обращаться",
+        "В интернет-форумы"
+      ],
+      correct: 0,
+      image: "https://i.imgur.com/dA96MUl.jpg"
+    }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+
+  const registration = document.getElementById("registration");
+  const startBtn = document.getElementById("startBtn");
+  const quiz = document.getElementById("quiz");
+  const questionTitle = document.getElementById("question-title");
+  const questionImage = document.getElementById("question-image");
+  const answersDiv = document.getElementById("answers");
+  const nextBtn = document.getElementById("nextBtn");
+  const resultDiv = document.getElementById("result");
+  const scoreText = document.getElementById("score-text");
+  const certificateDiv = document.getElementById("certificate");
+
+  function showQuestion() {
+    const q = questions[currentQuestion];
+    questionTitle.textContent = `Вопрос ${currentQuestion + 1}: ${q.question}`;
+    questionImage.src = q.image;
+    answersDiv.innerHTML = "";
+    q.answers.forEach((ans, i) => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="radio" name="answer" value="${i}" /> ${ans}`;
+      answersDiv.appendChild(label);
+    });
+    nextBtn.disabled = true;
+  }
+
+  answersDiv.addEventListener("change", () => {
+    nextBtn.disabled = false;
+  });
+
+  nextBtn.addEventListener("click", () => {
+    const selected = document.querySelector('input[name="answer"]:checked');
+    if (!selected) return alert("Выберите ответ!");
+
+    if (+selected.value === questions[currentQuestion].correct) {
+      score++;
+    }
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      showQuestion();
+    } else {
+      finishQuiz();
+    }
+  });
+
+  function finishQuiz() {
+    quiz.classList.add("hidden");
+    resultDiv.classList.remove("hidden");
+    scoreText.textContent = `Вы ответили правильно на ${score} из ${questions.length} вопросов.`;
+    const fio = document.getElementById("fio").value;
+    const age = document.getElementById("age").value;
+    certificateDiv.innerHTML = `
+      <h2>Сертификат</h2>
+      <p>Настоящим подтверждается, что <b>${fio}</b>, возраст <b>${age}</b>, успешно прошёл викторину по профилактике наркотиков.</p>
+      <p>Дата: ${new Date().toLocaleDateString()}</p>
+    `;
+    sendResultsToGoogleSheet({
+      fio,
+      age,
+      school: document.getElementById("school").value,
+      email: document.getElementById("email").value,
+      score,
+      total: questions.length,
+      date: new Date().toISOString()
+    });
+  }
+
+  startBtn.addEventListener("click", () => {
+    const fio = document.getElementById("fio").value.trim();
+    const age = document.getElementById("age").value.trim();
+    const school = document.getElementById("school").value.trim();
+    const email = document.getElementById("email").value.trim();
+    if (!fio || !age || !school || !email) {
+      alert("Пожалуйста, заполните все поля регистрации.");
+      return;
+    }
+    // Можно добавить валидацию email и возраста по желанию
+    registration.classList.add("hidden");
+    quiz.classList.remove("hidden");
+    showQuestion();
+  });
+
+  // Отправка результатов в Google Таблицу через Web Apps Script
+  function sendResultsToGoogleSheet(data) {
+    const url = 'YOUR_GOOGLE_SCRIPT_URL_HERE'; // Вставьте сюда URL вашего Google Apps Script
+
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors', // чтобы не возникло ошибки CORS
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).catch(e => {
+      console.log('Ошибка отправки данных:', e);
+    });
+  }
+</script>
+
+</body>
+</html>
